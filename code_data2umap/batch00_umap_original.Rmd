@@ -1,0 +1,91 @@
+---
+title: "t-SNE"
+output: html_notebook
+---
+
+
+```{r}
+rm(list = ls())
+library(tidyverse)
+
+```
+
+
+
+```{r}
+setwd("C:\\Users\\yan00286\\HDLab_XY\\1_Analysis_banditOnline\\2_ANALYSIS_Manifold")
+
+alldata = read.csv("bandit_umap_original.csv")#original data
+
+```
+
+
+
+
+```{r}
+#UMAP
+
+#filter1, below chance level and runlength < 1.5,N = 987
+#filter2, only below chance level, N = 982
+#filter3, below chance level OR runlength < 1.5, N = 924
+
+alldata_filter1 = alldata#filter(alldata,filter1==0)
+  
+#alldata_filter1 = filter(alldata,filter2==0)
+```
+
+
+```{r}
+
+
+
+
+
+
+library(umap)
+banditMFUMAP <- select(alldata_filter1, -subID,-filter1,-filter2,-filter3) %>%
+  as.matrix()%>%
+  umap(n_neighbors =15, min_dist = 0.3,
+      
+metric = "euclidean", n_epochs = 200,random_state=123)
+
+
+
+#visualize
+
+
+banditTibUMAP <- alldata_filter1 %>%
+mutate_if(.funs = scale, .predicate = is.numeric, scale = FALSE) %>%
+mutate(UMAP1 = banditMFUMAP$layout[, 1], UMAP2 = banditMFUMAP$layout[, 2]) %>%
+gather(key = "Variable", value = "Value", c(-UMAP1, -UMAP2, -subID,-dim2,-dim3,-dim4,-dim5,-dim6,-dim7,-dim8,-filter1,-filter2,-filter3))
+
+ggplot(banditTibUMAP, aes(UMAP1, UMAP2, col = Value)) +
+facet_wrap(~ Variable) +
+geom_point(size = 1) +
+scale_color_gradient(low = "dark blue", high = "cyan") +
+theme_bw()
+
+
+
+
+```
+
+
+```{r}
+# #visualize
+# 
+ 
+ banditTibUMAP <- alldata_filter1 %>%
+ mutate_if(.funs = scale, .predicate = is.numeric, scale = FALSE) %>%
+ mutate(UMAP1 = banditMFUMAP$layout[, 1], UMAP2 = banditMFUMAP$layout[, 2]) %>%
+ gather(key = "Variable", value = "Value", c(-UMAP1, -UMAP2, -subID,-dim2,-dim3,-dim4,-dim5,-dim6,-dim7,-dim8,-filter1,-filter2,-filter3))
+ 
+ ggplot(banditTibUMAP, aes(UMAP1, UMAP2, col = Value)) +
+ facet_wrap(~ Variable) +
+ geom_point(size = 1) +
+ scale_color_gradient(low = "dark blue", high = "cyan") +
+ theme_bw()
+```
+
+
+
